@@ -52,9 +52,12 @@ export class UsersService {
 
 
     async update(publicId: string, body: UpdateUserDto) {
-
         const user = await this.usersRepository.findOne({ where: { publicId } });
         if (!user) throw new NotFoundException('User not found');
+
+        if (body.password) {
+            body.password = await bcrypt.hash(body.password, 10);
+        }
 
         const updatedUser = await this.usersRepository.save({ ...user, ...body });
         return { message: "User updated successfully", success: true, updatedUser }

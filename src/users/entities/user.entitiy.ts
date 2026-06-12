@@ -25,7 +25,7 @@ export class User {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
-    @OneToMany(() => Wallet, wallet => wallet.userId)
+    @OneToMany(() => Wallet, wallet => wallet.user)
     wallets: Wallet[];
 
 }

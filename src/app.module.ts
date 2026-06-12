@@ -1,18 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm'
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entitiy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { Wallet } from './wallets/entities/wallet.entity';
+import { Transaction } from './wallets/entities/transaction.entity';
+import { RefreshToken } from './auth/entities/refresh-token.entity';
+import { envValidationSchema } from './config/env.validation';
+import { RolesGuard } from './general/guards/guards.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      validationSchema: envValidationSchema,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -23,16 +28,17 @@ import { Wallet } from './wallets/entities/wallet.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        synchronize: true,
-        entities: [User, Wallet]
+        synchronize: configService.get('NODE_ENV') !== 'production',
+        logging: configService.get('NODE_ENV') === 'development',
+        entities: [User, Wallet, Transaction, RefreshToken],
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     UsersModule,
     AuthModule,
-    WalletsModule
+    WalletsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RolesGuard],
 })
 export class AppModule {}
