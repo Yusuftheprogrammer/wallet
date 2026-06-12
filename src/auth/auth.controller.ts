@@ -7,6 +7,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { LoginDto } from './dtos/login.dto';
+import { SignupDto } from './dtos/signup.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { AuthService } from './auth.service';
 import { JwtGuard } from './passport/jwt.guard';
@@ -14,6 +15,11 @@ import { JwtGuard } from './passport/jwt.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Post('signup')
+  signup(@Body() signupDto: SignupDto) {
+    return this.authService.signup(signupDto);
+  }
 
   @Post('login')
   login(@Body() loginDto: LoginDto) {

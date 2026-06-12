@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
+import { SignupDto } from './dtos/signup.dto';
 import { UsersService } from 'src/users/users.service';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { generateOpaqueToken, hashToken } from 'src/common/utils/hash-token';
@@ -22,6 +23,17 @@ export class AuthService {
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
   ) {}
+
+  async signup(signupDto: SignupDto) {
+    const { user } = await this.usersService.create(signupDto);
+    const tokens = await this.issueTokenPair(user.publicId, user.role);
+
+    return {
+      message: 'Account created successfully',
+      success: true,
+      ...tokens,
+    };
+  }
 
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByEmail(loginDto.email);
